@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyZen - Grow Your Focus</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>StudyZen 🌱</h1>
+            <div class="stats">
+                <span id="streak">🔥 0 days</span>
+                <span id="total-sessions">📚 0 sessions</span>
+            </div>
+        </header>
+
+        <!-- Main Plant Display -->
+        <div class="plant-container">
+            <div id="plant" class="plant-stage-0"></div>
+            <div class="growth-bar">
+                <div id="growth-progress" class="growth-progress"></div>
+            </div>
+        </div>
+
+        <!-- Timer Section -->
+        <div class="timer-section">
+            <div id="timer-display" class="timer-display">25:00</div>
+            <div class="timer-controls">
+                <button id="start-btn" class="btn btn-primary">Start Focus</button>
+                <button id="pause-btn" class="btn btn-secondary">Pause</button>
+                <button id="reset-btn" class="btn btn-secondary">Reset</button>
+            </div>
+            <div class="session-info">
+                <span id="session-type" class="session-study">Focus Time</span>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section">
+            <h3>Your Progress</h3>
+            <div class="progress-stats">
+                <div class="stat">
+                    <span class="stat-value" id="current-stage">Seed</span>
+                    <span class="stat-label">Current Plant</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="growth-percent">0%</span>
+                    <span class="stat-label">Growth</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/plant.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+/* css/style.css */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --background-color: #f5f5f5;
+    --text-color: #333;
+    --study-color: #FF6B6B;
+    --break-color: #4ECDC4;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.app-container {
+    max-width: 400px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* Plant Animation */
+.plant-container {
+    text-align: center;
+    margin: 30px 0;
+}
+
+.plant-stage-0, .plant-stage-1, .plant-stage-2, 
+.plant-stage-3, .plant-stage-4, .plant-stage-5 {
+    width: 150px;
+    height: 200px;
+    margin: 0 auto;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: all 0.5s ease-in-out;
+}
+
+.plant-stage-0 { background-image: url('../assets/plants/seed.svg'); }
+.plant-stage-1 { background-image: url('../assets/plants/sprout.svg'); }
+.plant-stage-2 { background-image: url('../assets/plants/budding.svg'); }
+.plant-stage-3 { background-image: url('../assets/plants/flowering.svg'); }
+.plant-stage-4 { background-image: url('../assets/plants/mature.svg'); }
+.plant-stage-5 { background-image: url('../assets/plants/blooming.svg'); }
+
+/* Timer Styles */
+.timer-display {
+    font-size: 4rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.session-study { color: var(--study-color); }
+.session-break { color: var(--break-color); }
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-secondary {
+    background: #e0e0e0;
+    color: #666;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}

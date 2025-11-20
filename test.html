@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyZen - Grow Your Focus</title>
+    <style>
+        /* We'll put all CSS here for simplicity */
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --study-color: #FF6B6B;
+            --break-color: #4ECDC4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .app-header h1 {
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .stats {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stats span {
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .plant-container {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .plant-visual {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            transition: all 0.5s ease;
+        }
+
+        .stage-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .growth-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .growth-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), #8BC34A);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .growth-percent {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .timer-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .session-type {
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .session-study {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--study-color);
+            border: 2px solid var(--study-color);
+        }
+
+        .session-break {
+            background: rgba(78, 205, 196, 0.1);
+            color: var(--break-color);
+            border: 2px solid var(--break-color);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .progress-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .progress-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1000;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .growing {
+            animation: grow 0.5s ease-in-out;
+        }
+
+        @keyframes grow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .pulsing {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>StudyZen 🌱</h1>
+            <div class="stats">
+                <span id="streak">🔥 0 days</span>
+                <span id="total-sessions">📚 0 sessions</span>
+            </div>
+        </header>
+
+        <div class="plant-container">
+            <div class="plant-visual" id="plant-emoji">🌱</div>
+            <div class="stage-name" id="stage-name">Seed</div>
+            <div class="growth-bar">
+                <div id="growth-progress" class="growth-progress" style="width: 0%;"></div>
+            </div>
+            <div class="growth-percent" id="growth-percent">0%</div>
+        </div>
+
+        <div class="timer-section">
+            <div id="timer-display" class="timer-display">25:00</div>
+            <div class="session-type session-study" id="session-type">Focus Time</div>
+            <div class="timer-controls">
+                <button id="start-btn" class="btn btn-primary">Start Focus</button>
+                <button id="pause-btn" class="btn btn-secondary" disabled>Pause</button>
+                <button id="reset-btn" class="btn btn-secondary">Reset</button>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <h3>Your Study Journey</h3>
+            <div class="progress-stats">
+                <div class="stat">
+                    <span class="stat-value" id="current-stage">Seed</span>
+                    <span class="stat-label">Current Plant</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="total-time">0min</span>
+                    <span class="stat-label">Total Focus</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" id="session-count">0</span>
+                    <span class="stat-label">Sessions</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="notification" class="notification hidden">
+            <span id="notification-text"></span>
+        </div>
+    </div>
+
+    <script>
+        // All JavaScript in one file for simplicity
+        class StudyZenApp {
+            constructor() {
+                this.stages = [
+                    { name: "Seed", growth: 0, emoji: "🌱", message: "Your learning journey begins!" },
+                    { name: "Sprout", growth: 20, emoji: "🌿", message: "Your plant is sprouting! Keep going!" },
+                    { name: "Budding", growth: 40, emoji: "🍀", message: "Look at those buds! You're growing well!" },
+                    { name: "Flowering", growth: 60, emoji: "🌴", message: "Beautiful flowers! Your dedication shows!" },
+                    { name: "Mature", growth: 80, emoji: "🌳", message: "What a strong plant! You're doing amazing!" },
+                    { name: "Blooming", growth: 100, emoji: "🌺", message: "Fully bloomed! You've mastered consistency!" }
+                ];
+                
+                this.currentStage = 0;
+                this.currentGrowth = 0;
+                this.isRunning = false;
+                this.isStudySession = true;
+                this.timeLeft = 25 * 60; // 25 minutes
+                this.interval = null;
+                
+                this.userData = this.loadProgress();
+                this.initializeApp();
+            }
+
+            initializeApp() {
+                // Load saved progress
+                this.loadPlantProgress(this.userData.plantGrowth);
+                this.updateProgressUI();
+                this.setupEventListeners();
+                console.log('StudyZen app initialized!');
+            }
+
+            setupEventListeners() {
+                document.getElementById('start-btn').addEventListener('click', () => this.startTimer());
+                document.getElementById('pause-btn').addEventListener('click', () => this.pauseTimer());
+                document.getElementById('reset-btn').addEventListener('click', () => this.resetTimer());
+            }
+
+            startTimer() {
+                if (!this.isRunning) {
+                    this.isRunning = true;
+                    this.interval = setInterval(() => this.tick(), 1000);
+                    this.updateButtonStates();
+                    document.getElementById('timer-display').classList.add('pulsing');
+                }
+            }
+
+            pauseTimer() {
+                if (this.isRunning) {
+                    this.isRunning = false;
+                    clearInterval(this.interval);
+                    this.updateButtonStates();
+                    document.getElementById('timer-display').classList.remove('pulsing');
+                }
+            }
+
+            resetTimer() {
+                this.pauseTimer();
+                this.isStudySession = true;
+                this.timeLeft = 25 * 60;
+                this.updateDisplay();
+                this.updateSessionType();
+            }
+
+            tick() {
+                this.timeLeft--;
+                this.updateDisplay();
+
+                if (this.timeLeft <= 0) {
+                    this.completeSession();
+                }
+            }
+
+            completeSession() {
+                clearInterval(this.interval);
+                this.isRunning = false;
+                
+                this.playCompletionSound();
+                
+                if (this.isStudySession) {
+                    this.growPlant(20);
+                    this.userData.totalSessions += 1;
+                    this.userData.totalTime += 25;
+                    this.userData.lastSession = new Date().toISOString();
+                    this.saveProgress();
+                    this.updateProgressUI();
+                }
+                
+                this.switchMode();
+                this.updateButtonStates();
+                document.getElementById('timer-display').classList.remove('pulsing');
+            }
+
+            switchMode() {
+                this.isStudySession = !this.isStudySession;
+                this.timeLeft = this.isStudySession ? 25 * 60 : 5 * 60;
+                this.updateSessionType();
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                const minutes = Math.floor(this.timeLeft / 60);
+                const seconds = this.timeLeft % 60;
+                document.getElementById('timer-display').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            updateSessionType() {
+                const sessionType = document.getElementById('session-type');
+                sessionType.textContent = this.isStudySession ? 'Focus Time' : 'Break Time';
+                sessionType.className = `session-type ${this.isStudySession ? 'session-study' : 'session-break'}`;
+            }
+
+            updateButtonStates() {
+                const startBtn = document.getElementById('start-btn');
+                const pauseBtn = document.getElementById('pause-btn');
+                
+                startBtn.disabled = this.isRunning;
+                pauseBtn.disabled = !this.isRunning;
+                startBtn.textContent = this.isRunning ? 'Running...' : 'Start Focus';
+            }
+
+            growPlant(amount = 20) {
+                const oldStage = this.currentStage;
+                this.currentGrowth = Math.min(100, this.currentGrowth + amount);
+                this.updatePlantStage();
+                
+                if (oldStage !== this.currentStage) {
+                    this.celebrateStageUp();
+                }
+                
+                this.renderPlant();
+                return this.currentGrowth;
+            }
+
+            updatePlantStage() {
+                for (let i = this.stages.length - 1; i >= 0; i--) {
+                    if (this.currentGrowth >= this.stages[i].growth) {
+                        this.currentStage = i;
+                        break;
+                    }
+                }
+            }
+
+            celebrateStageUp() {
+                const stage = this.stages[this.currentStage];
+                this.showNotification(`🎉 ${stage.message}`);
+                
+                const plantEmoji = document.getElementById('plant-emoji');
+                plantEmoji.classList.add('growing');
+                setTimeout(() => {
+                    plantEmoji.classList.remove('growing');
+                }, 1000);
+            }
+
+            showNotification(message) {
+                const notification = document.getElementById('notification');
+                const notificationText = document.getElementById('notification-text');
+                
+                notificationText.textContent = message;
+                notification.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    notification.classList.add('hidden');
+                }, 3000);
+            }
+
+            renderPlant() {
+                document.getElementById('plant-emoji').textContent = this.stages[this.currentStage].emoji;
+                document.getElementById('stage-name').textContent = this.stages[this.currentStage].name;
+                document.getElementById('growth-progress').style.width = `${this.currentGrowth}%`;
+                document.getElementById('growth-percent').textContent = `${Math.round(this.currentGrowth)}%`;
+                document.getElementById('current-stage').textContent = this.stages[this.currentStage].name;
+            }
+
+            loadPlantProgress(growth) {
+                this.currentGrowth = growth;
+                this.updatePlantStage();
+                this.renderPlant();
+            }
+
+            updateProgressUI() {
+                document.getElementById('streak').textContent = `🔥 ${this.userData.streak} days`;
+                document.getElementById('total-sessions').textContent = `📚 ${this.userData.totalSessions} sessions`;
+                document.getElementById('session-count').textContent = this.userData.totalSessions;
+                document.getElementById('total-time').textContent = `${this.userData.totalTime}min`;
+            }
+
+            playCompletionSound() {
+                // Simple beep using Web Audio API
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 800;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (error) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            // Storage methods
+            loadProgress() {
+                try {
+                    const data = JSON.parse(localStorage.getItem('studyzen-data'));
+                    if (data) {
+                        return {
+                            plantGrowth: data.plantGrowth || 0,
+                            totalSessions: data.totalSessions || 0,
+                            totalTime: data.totalTime || 0,
+                            lastSession: data.lastSession || null,
+                            streak: data.streak || 0
+                        };
+                    }
+                } catch (error) {
+                    console.error('Failed to load progress');
+                }
+
+                return {
+                    plantGrowth: 0,
+                    totalSessions: 0,
+                    totalTime: 0,
+                    lastSession: null,
+                    streak: 0
+                };
+            }
+
+            saveProgress() {
+                try {
+                    const saveData = {
+                        plantGrowth: this.currentGrowth,
+                        totalSessions: this.userData.totalSessions,
+                        totalTime: this.userData.totalTime,
+                        lastSession: this.userData.lastSession,
+                        streak: this.userData.streak,
+                        lastSave: new Date().toISOString()
+                    };
+                    localStorage.setItem('studyzen-data', JSON.stringify(saveData));
+                    return true;
+                } catch (error) {
+                    console.error('Failed to save progress');
+                    return false;
+                }
+            }
+        }
+
+        // Initialize the app when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.studyZenApp = new StudyZenApp();
+        });
+    </script>
+</body>
+</html>
