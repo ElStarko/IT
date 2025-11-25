@@ -1,4 +1,3 @@
-// js/app.js
 class StudyZenApp {
     constructor() {
         this.plant = new DigitalPlant();
@@ -8,6 +7,7 @@ class StudyZenApp {
         );
         
         this.userData = Storage.loadProgress();
+        this.settings = Storage.loadSettings();
         this.initializeApp();
     }
 
@@ -18,42 +18,100 @@ class StudyZenApp {
         // Update UI with saved data
         this.updateProgressUI();
         
-        // Set up any additional event listeners
-        this.setupAdditionalListeners();
+        // Setup settings modal
+        this.setupSettingsModal();
         
         console.log('StudyZen app initialized!');
     }
 
+    setupSettingsModal() {
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeSettings = document.getElementById('close-settings');
+        const saveSettings = document.getElementById('save-settings');
+        const focusTimeInput = document.getElementById('focus-time');
+        const breakTimeInput = document.getElementById('break-time');
+
+        // Load current settings into inputs
+        focusTimeInput.value = this.settings.focusTime;
+        breakTimeInput.value = this.settings.breakTime;
+
+        // Event listeners for settings modal
+        settingsBtn.addEventListener('click', () => {
+            settingsModal.classList.remove('hidden');
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsModal.classList.add('hidden');
+        });
+
+        saveSettings.addEventListener('click', () => {
+            this.saveNewSettings();
+            settingsModal.classList.add('hidden');
+        });
+
+        // Close modal when clicking outside
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.classList.add('hidden');
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !settingsModal.classList.contains('hidden')) {
+                settingsModal.classList.add('hidden');
+            }
+        });
+    }
+
+    saveNewSettings() {
+        const focusTimeInput = document.getElementById('focus-time');
+        const breakTimeInput = document.getElementById('break-time');
+
+        const newSettings = {
+            focusTime: parseInt(focusTimeInput.value) || 25,
+            breakTime: parseInt(breakTimeInput.value) || 5
+        };
+
+        // Validate settings
+        if (newSettings.focusTime < 1 || newSettings.focusTime > 60) {
+            this.plant.showNotification('❌ Focus time must be between 1-60 minutes');
+            return;
+        }
+
+        if (newSettings.breakTime < 1 || newSettings.breakTime > 30) {
+            this.plant.showNotification('❌ Break time must be between 1-30 minutes');
+            return;
+        }
+
+        this.settings = newSettings;
+        Storage.saveSettings(this.settings);
+        this.timer.updateSettings(this.settings);
+        
+        this.plant.showNotification('✅ Settings saved!');
+    }
+
     handleSessionComplete(isStudySession) {
         if (isStudySession) {
-            // Study session completed - grow the plant!
             const newGrowth = this.plant.grow(20);
             
-            // Update user data
             this.userData.plantGrowth = newGrowth;
             this.userData.totalSessions += 1;
-            this.userData.totalTime += 25; // 25 minutes per session
+            this.userData.totalTime += this.settings.focusTime;
             this.userData.lastSession = new Date().toISOString();
             this.userData.streak = Storage.calculateStreak();
             
-            // Save progress
             Storage.saveProgress(this.userData);
-            
-            // Update UI
             this.updateProgressUI();
-            
-            // Show celebration
             this.showCelebration();
         } else {
-            // Break session completed
             this.plant.showNotification('💫 Break time over! Ready to focus again?');
         }
     }
 
     handleTick(timeLeft) {
-        // Optional: Add any tick-based animations or updates
         if (timeLeft === 10) {
-            // Last 10 seconds pulse effect
             this.timer.timerDisplay.style.color = '#ff6b6b';
         } else if (timeLeft === 0) {
             this.timer.timerDisplay.style.color = '';
@@ -61,25 +119,15 @@ class StudyZenApp {
     }
 
     updateProgressUI() {
-        // Update stats
         document.getElementById('streak').textContent = `🔥 ${this.userData.streak} days`;
         document.getElementById('total-sessions').textContent = `📚 ${this.userData.totalSessions} sessions`;
         document.getElementById('session-count').textContent = this.userData.totalSessions;
         document.getElementById('total-time').textContent = `${this.userData.totalTime}min`;
-        
-        // Update growth percentage
-        const growthPercent = document.getElementById('growth-percent');
-        growthPercent.textContent = `${Math.round(this.userData.plantGrowth)}%`;
     }
 
     showCelebration() {
-        // Add visual celebration effects
-        const plantDisplay = document.getElementById('plant-display');
-        
-        // Create floating emojis
         this.createFloatingEmojis();
         
-        // Haptic feedback (if supported)
         if (navigator.vibrate) {
             navigator.vibrate([100, 50, 100]);
         }
@@ -105,13 +153,11 @@ class StudyZenApp {
             container.style.position = 'relative';
             container.appendChild(floatEmoji);
             
-            // Remove after animation
             setTimeout(() => {
                 floatEmoji.remove();
             }, 2000);
         });
 
-        // Add floating animation to CSS if not already present
         if (!document.querySelector('#float-animation')) {
             const style = document.createElement('style');
             style.id = 'float-animation';
@@ -131,30 +177,12 @@ class StudyZenApp {
         }
     }
 
-    setupAdditionalListeners() {
-        // Add any additional app-level event listeners here
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault();
-                if (this.timer.isRunning) {
-                    this.timer.pause();
-                } else {
-                    this.timer.start();
-                }
-            }
-        });
-
-        // Add service worker for PWA capabilities (optional)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(console.error);
-        }
-    }
-
     // Utility method to reset all data (for testing)
     resetAllData() {
         if (confirm('Are you sure you want to reset all progress? This cannot be undone!')) {
             Storage.clearData();
             this.userData = Storage.loadProgress();
+            this.settings = Storage.loadSettings();
             this.plant.loadProgress(0);
             this.timer.reset();
             this.updateProgressUI();
@@ -170,18 +198,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add reset functionality for testing (remove in production)
     console.log('StudyZen loaded! Use studyZenApp.resetAllData() to reset progress.');
 });
-
-// Add PWA manifest (optional)
-const manifest = document.createElement('link');
-manifest.rel = 'manifest';
-manifest.href = '/app.webmanifest';
-document.head.appendChild(manifest);
-
-// Add meta tags for mobile app experience
-const viewport = document.querySelector('meta[name="viewport"]');
-viewport.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
-
-const themeColor = document.createElement('meta');
-themeColor.name = 'theme-color';
-themeColor.content = '#4CAF50';
-document.head.appendChild(themeColor);
