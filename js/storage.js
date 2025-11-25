@@ -1,41 +1,17 @@
 const Storage = {
-    KEY: 'studyzen-data',
-    SETTINGS_KEY: 'studyzen-settings',
-
+    // These methods are now user-aware and will use the auth system
     saveProgress(data) {
-        try {
-            const saveData = {
-                plantGrowth: data.plantGrowth,
-                totalSessions: data.totalSessions,
-                totalTime: data.totalTime,
-                lastSession: data.lastSession,
-                streak: data.streak,
-                lastSave: new Date().toISOString()
-            };
-            localStorage.setItem(this.KEY, JSON.stringify(saveData));
+        if (window.auth && window.auth.currentUser) {
+            window.auth.updateUserProgress(data);
             return true;
-        } catch (error) {
-            console.error('Failed to save progress:', error);
-            return false;
         }
+        return false;
     },
 
     loadProgress() {
-        try {
-            const data = JSON.parse(localStorage.getItem(this.KEY));
-            if (data) {
-                return {
-                    plantGrowth: data.plantGrowth || 0,
-                    totalSessions: data.totalSessions || 0,
-                    totalTime: data.totalTime || 0,
-                    lastSession: data.lastSession || null,
-                    streak: data.streak || 0
-                };
-            }
-        } catch (error) {
-            console.error('Failed to load progress:', error);
+        if (window.auth && window.auth.currentUser) {
+            return window.auth.getUserProgress();
         }
-
         return {
             plantGrowth: 0,
             totalSessions: 0,
@@ -46,25 +22,17 @@ const Storage = {
     },
 
     saveSettings(settings) {
-        try {
-            localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(settings));
+        if (window.auth && window.auth.currentUser) {
+            window.auth.updateUserSettings(settings);
             return true;
-        } catch (error) {
-            console.error('Failed to save settings:', error);
-            return false;
         }
+        return false;
     },
 
     loadSettings() {
-        try {
-            const settings = JSON.parse(localStorage.getItem(this.SETTINGS_KEY));
-            if (settings) {
-                return settings;
-            }
-        } catch (error) {
-            console.error('Failed to load settings:', error);
+        if (window.auth && window.auth.currentUser) {
+            return window.auth.getUserSettings();
         }
-
         return {
             focusTime: 25,
             breakTime: 5
@@ -91,8 +59,9 @@ const Storage = {
         }
     },
 
+    // Clear all data (for testing)
     clearData() {
-        localStorage.removeItem(this.KEY);
-        localStorage.removeItem(this.SETTINGS_KEY);
+        localStorage.removeItem('studyzen-users');
+        localStorage.removeItem('studyzen-current-user');
     }
 };

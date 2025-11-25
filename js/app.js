@@ -1,17 +1,32 @@
 class StudyZenApp {
     constructor() {
-        this.plant = new DigitalPlant();
-        this.timer = new StudyTimer(
-            (isStudySession) => this.handleSessionComplete(isStudySession),
-            (timeLeft) => this.handleTick(timeLeft)
-        );
-        
-        this.userData = Storage.loadProgress();
-        this.settings = Storage.loadSettings();
-        this.initializeApp();
+        // Wait for auth to be initialized
+        setTimeout(() => {
+            this.initializeApp();
+        }, 100);
     }
 
     initializeApp() {
+        // Only initialize if user is logged in
+        if (window.auth && window.auth.currentUser) {
+            this.plant = new DigitalPlant();
+            this.timer = new StudyTimer(
+                (isStudySession) => this.handleSessionComplete(isStudySession),
+                (timeLeft) => this.handleTick(timeLeft)
+            );
+            
+            this.userData = Storage.loadProgress();
+            this.settings = Storage.loadSettings();
+            this.setupApp();
+        }
+    }
+
+    onUserLogin(user) {
+        // Re-initialize app when user logs in
+        this.initializeApp();
+    }
+
+    setupApp() {
         // Load saved progress
         this.plant.loadProgress(this.userData.plantGrowth);
         
@@ -21,7 +36,7 @@ class StudyZenApp {
         // Setup settings modal
         this.setupSettingsModal();
         
-        console.log('StudyZen app initialized!');
+        console.log('StudyZen app initialized for user:', window.auth.currentUser.username);
     }
 
     setupSettingsModal() {
@@ -76,12 +91,12 @@ class StudyZenApp {
 
         // Validate settings
         if (newSettings.focusTime < 1 || newSettings.focusTime > 60) {
-            this.plant.showNotification('❌ Focus time must be between 1-60 minutes');
+            this.showNotification('❌ Focus time must be between 1-60 minutes');
             return;
         }
 
         if (newSettings.breakTime < 1 || newSettings.breakTime > 30) {
-            this.plant.showNotification('❌ Break time must be between 1-30 minutes');
+            this.showNotification('❌ Break time must be between 1-30 minutes');
             return;
         }
 
@@ -89,7 +104,7 @@ class StudyZenApp {
         Storage.saveSettings(this.settings);
         this.timer.updateSettings(this.settings);
         
-        this.plant.showNotification('✅ Settings saved!');
+        this.showNotification('✅ Settings saved!');
     }
 
     handleSessionComplete(isStudySession) {
@@ -106,7 +121,7 @@ class StudyZenApp {
             this.updateProgressUI();
             this.showCelebration();
         } else {
-            this.plant.showNotification('💫 Break time over! Ready to focus again?');
+            this.showNotification('💫 Break time over! Ready to focus again?');
         }
     }
 
@@ -131,6 +146,18 @@ class StudyZenApp {
         if (navigator.vibrate) {
             navigator.vibrate([100, 50, 100]);
         }
+    }
+
+    showNotification(message) {
+        const notification = document.getElementById('notification');
+        const notificationText = document.getElementById('notification-text');
+        
+        notificationText.textContent = message;
+        notification.classList.remove('hidden');
+        
+        setTimeout(() => {
+            notification.classList.add('hidden');
+        }, 3000);
     }
 
     createFloatingEmojis() {
@@ -186,15 +213,15 @@ class StudyZenApp {
             this.plant.loadProgress(0);
             this.timer.reset();
             this.updateProgressUI();
-            this.plant.showNotification('🔄 All progress has been reset.');
+            this.showNotification('🔄 All progress has been reset.');
         }
     }
 }
 
-// Initialize the app when DOM is loaded
+// Initialize auth first, then app
 document.addEventListener('DOMContentLoaded', () => {
+    window.auth = new Auth();
     window.studyZenApp = new StudyZenApp();
     
-    // Add reset functionality for testing (remove in production)
-    console.log('StudyZen loaded! Use studyZenApp.resetAllData() to reset progress.');
+    console.log('StudyZen loaded! Users are stored in localStorage.');
 });
